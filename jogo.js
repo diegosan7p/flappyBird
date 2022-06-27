@@ -10,8 +10,8 @@ const contexto = canvas.getContext('2d')
 const backGround = {
   spriteX: 390,
   spriteY:0,
-  largura:275,
-  altura:204,
+  width:275,
+  height:204,
   PositionX:0,
   PositionY: canvas.height - 204,
   
@@ -22,17 +22,17 @@ const backGround = {
     contexto.drawImage(  
       sprites,
       backGround.spriteX, backGround.spriteY, // Sprite x, Sprite Y
-      backGround.largura, backGround.altura, //Tamanho da Sprite
+      backGround.width, backGround.height, //Tamanho da Sprite
       backGround.PositionX, backGround.PositionY,
-      backGround.largura, backGround.altura
+      backGround.width, backGround.height
       );
 
     contexto.drawImage(  
       sprites,
       backGround.spriteX, backGround.spriteY, // Sprite x, Sprite Y
-      backGround.largura, backGround.altura, //Tamanho da Sprite
-      (backGround.PositionX + backGround.largura), backGround.PositionY,
-      backGround.largura, backGround.altura
+      backGround.width, backGround.height, //Tamanho da Sprite
+      (backGround.PositionX + backGround.width), backGround.PositionY,
+      backGround.width, backGround.height
       );
   }
 }
@@ -41,8 +41,8 @@ const backGround = {
 const floor = {
   spriteX: 0,
   spriteY:610,
-  largura:224,
-  altura:112,
+  width:224,
+  height:112,
   PositionX:0,
   PositionY:canvas.height - 112,
   
@@ -50,58 +50,128 @@ const floor = {
     contexto.drawImage(  
       sprites,
       floor.spriteX, floor.spriteY, // Sprite x, Sprite Y
-      floor.largura, floor.altura, //Tamanho da Sprite
+      floor.width, floor.height, //Tamanho da Sprite
       floor.PositionX, floor.PositionY,
-      floor.largura, floor.altura
+      floor.width, floor.height
       );
 
       contexto.drawImage(  
         sprites,
         floor.spriteX, floor.spriteY, // Sprite x, Sprite Y
-        floor.largura, floor.altura, //Tamanho da Sprite
-        (floor.PositionX + floor.largura), floor.PositionY,
-        floor.largura, floor.altura
+        floor.width, floor.height, //Tamanho da Sprite
+        (floor.PositionX + floor.width), floor.PositionY,
+        floor.width, floor.height
         );
   }
   }
 
-// [Flappi Bird]
+// [Flappy Bird]
 const flappyBird = {
 spriteX: 0,
 spriteY:0,
-largura:33,
-altura:24,
+width:33,
+height:24,
 PositionX:10,
 PositionY:50,
-gravidade:0.25,
-velocidade: 0,
+gravity:0.25,
+velocity: 0,
 
 
 update() {
-  flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade
-  flappyBird.PositionY = flappyBird.PositionY + flappyBird.velocidade;
+  flappyBird.velocity = flappyBird.velocity + flappyBird.gravity
+  flappyBird.PositionY = flappyBird.PositionY + flappyBird.velocity;
 },
 
 draw() {
   contexto.drawImage(  
     sprites,
     flappyBird.spriteX, flappyBird.spriteY, // Sprite x, Sprite Y
-    flappyBird.largura, flappyBird.altura, //Tamanho da Sprite
+    flappyBird.width, flappyBird.height, //Tamanho da Sprite
     flappyBird.PositionX, flappyBird.PositionY,
-    flappyBird.largura, flappyBird.altura
+    flappyBird.width, flappyBird.height
     )
 }
 
 }
 
+const mensageGetReady = {
+    spriteX: 134,
+    spriteY:0,
+    width:174,
+    height:152,
+    PositionX: (canvas.width / 2) - 174 / 2,
+    PositionY:50,
+    
+    draw() {
+      contexto.drawImage(  
+        sprites,
+        mensageGetReady.spriteX, mensageGetReady.spriteY, // Sprite x, Sprite Y
+        mensageGetReady.width, mensageGetReady.height, //Tamanho da Sprite
+        mensageGetReady.PositionX, mensageGetReady.PositionY,
+        mensageGetReady.width, mensageGetReady.height
+        );
+  
+        contexto.drawImage(  
+          sprites,
+          floor.spriteX, floor.spriteY, // Sprite x, Sprite Y
+          floor.width, floor.height, //Tamanho da Sprite
+          (floor.PositionX + floor.width), floor.PositionY,
+          floor.width, floor.height
+          );
+    }
+}
+
+
+//
+// [Screens]
+//
+let screensActive = {};
+function switchToScreen(newScreen) {
+  screensActive = newScreen
+}
+
+const screens = {
+  start: {
+    draw() {
+      backGround.draw();
+      floor.draw();
+      flappyBird.draw();
+      mensageGetReady.draw();
+    },
+
+    click(){
+      switchToScreen(screens.jogo);
+    },
+
+    update() {
+
+    }
+  }
+}
+
+screens.jogo = {
+  draw() {
+    backGround.draw();
+    floor.draw();
+    flappyBird.draw();
+  },
+  update() {
+    flappyBird.update();
+  }
+}
+
 function loop() {
-  backGround.draw();
-  floor.draw();
-  flappyBird.draw();
-  flappyBird.update();
+screensActive.draw()
+screensActive.update()
 
   requestAnimationFrame(loop);  
 }
 
+window.addEventListener('click', function() {
+  if(screensActive) {
+    screensActive.click()
+  }
+})
 
+switchToScreen(screens.start);
 loop();
