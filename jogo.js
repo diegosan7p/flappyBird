@@ -440,5 +440,5 @@ window.addEventListener('click', function () {
   }
 })
 
-switchToScreen(screens.gameOver)
+switchToScreen(screens.start)
 loop()
