@@ -2,6 +2,15 @@ console.log('[Teste] Flappy Bird!')
 
 let frames = 0
 
+const fall_sound = new Audio()
+fall_sound.src = './effects/fall.wav'
+
+const score_sound = new Audio()
+score_sound.src = './effects/score.wav'
+
+const jump_sound = new Audio()
+jump_sound.src = './effects/jump.wav'
+
 const hit_sound = new Audio()
 hit_sound.src = './effects/hit.wav'
 
@@ -9,9 +18,9 @@ const sprites = new Image()
 sprites.src = './sprites.png'
 
 const canvas = document.querySelector('canvas')
-const contexto = canvas.getContext('2d')
+const context = canvas.getContext('2d')
 
-// [Backgroud]
+// [Background]
 const backGround = {
   spriteX: 390,
   spriteY: 0,
@@ -21,10 +30,10 @@ const backGround = {
   PositionY: canvas.height - 204,
 
   draw() {
-    contexto.fillStyle = '#70c5ce'
-    contexto.fillRect(0, 0, canvas.width, canvas.height)
+    context.fillStyle = '#70c5ce'
+    context.fillRect(0, 0, canvas.width, canvas.height)
 
-    contexto.drawImage(
+    context.drawImage(
       sprites,
       backGround.spriteX,
       backGround.spriteY, // Sprite x, Sprite Y
@@ -36,7 +45,7 @@ const backGround = {
       backGround.height
     )
 
-    contexto.drawImage(
+    context.drawImage(
       sprites,
       backGround.spriteX,
       backGround.spriteY, // Sprite x, Sprite Y
@@ -68,7 +77,7 @@ function createFloor() {
     },
 
     draw() {
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         floor.spriteX,
         floor.spriteY, // Sprite x, Sprite Y
@@ -80,7 +89,7 @@ function createFloor() {
         floor.height
       )
 
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         floor.spriteX,
         floor.spriteY, // Sprite x, Sprite Y
@@ -121,28 +130,29 @@ function createFlappyBird() {
     jump: 4.6,
 
     toJump() {
-      flappyBird.velocity = -flappyBird.jump
+      flappyBird.velocity = - flappyBird.jump
+      jump_sound.play()
     },
 
     update() {
       if (collision(flappyBird, global.floor)) {
-        console.log('faz colisao')
         hit_sound.play()
-        setTimeout(() => {
-          switchToScreen(screens.start)
-        }, 500)
+          switchToScreen(screens.gameOver)
+
         return
       }
-
       flappyBird.velocity = flappyBird.velocity + flappyBird.gravity
       flappyBird.PositionY = flappyBird.PositionY + flappyBird.velocity
+      if(flappyBird.velocity > 8) {
+          fall_sound.play()
+      }
     },
 
     move: [
-      { spriteX: 0, spriteY: 0 }, //asa para cima
-      { spriteX: 0, spriteY: 26 }, //asa no meio
-      { spriteX: 0, spriteY: 52 }, //asa para baixo
-      { spriteX: 0, spriteY: 26 } //asa no meio
+      { spriteX: 0, spriteY: 0 }, //asa para top
+      { spriteX: 0, spriteY: 26 }, //asa no mid
+      { spriteX: 0, spriteY: 52 }, //asa para bot
+      { spriteX: 0, spriteY: 26 } //asa no mid
     ],
 
     currentFrame: 0,
@@ -162,7 +172,7 @@ function createFlappyBird() {
     draw() {
       flappyBird.updateToFrame()
       const { spriteX, spriteY } = flappyBird.move[flappyBird.currentFrame]
-      contexto.drawImage(
+      context.drawImage(
         sprites,
         spriteX,
         spriteY, // Sprite x, Sprite Y
@@ -178,7 +188,7 @@ function createFlappyBird() {
   return flappyBird
 }
 
-const mensageGetReady = {
+const messageGetReady = {
   spriteX: 134,
   spriteY: 0,
   width: 174,
@@ -187,41 +197,56 @@ const mensageGetReady = {
   PositionY: 50,
 
   draw() {
-    contexto.drawImage(
+    context.drawImage(
       sprites,
-      mensageGetReady.spriteX,
-      mensageGetReady.spriteY, // Sprite x, Sprite Y
-      mensageGetReady.width,
-      mensageGetReady.height, //Tamanho da Sprite
-      mensageGetReady.PositionX,
-      mensageGetReady.PositionY,
-      mensageGetReady.width,
-      mensageGetReady.height
-    )
-
-    contexto.drawImage(
-      sprites,
-      global.floor.spriteX,
-      global.floor.spriteY, // Sprite x, Sprite Y
-      global.floor.width,
-      global.floor.height, //Tamanho da Sprite
-      global.floor.PositionX + global.floor.width,
-      global.floor.PositionY,
-      global.floor.width,
-      global.floor.height
+      messageGetReady.spriteX,
+      messageGetReady.spriteY, // Sprite x, Sprite Y
+      messageGetReady.width,
+      messageGetReady.height, //Tamanho da Sprite
+      messageGetReady.PositionX,
+      messageGetReady.PositionY,
+      messageGetReady.width,
+      messageGetReady.height
     )
   }
 }
 
-// [Screens]
-const global = {}
-let screensActive = {}
-function switchToScreen(newScreen) {
-  screensActive = newScreen
+const messageGameOver = {
+  spriteX: 134,
+  spriteY: 153,
+  width: 226,
+  height: 200,
+  PositionX: canvas.width / 2 - 226 / 2,
+  PositionY: 50,
 
-  if (screensActive.initialize) {
-    screensActive.initialize()
+  draw() {
+    context.drawImage(
+      sprites,
+      messageGameOver.spriteX,
+      messageGameOver.spriteY, // Sprite x, Sprite Y
+      messageGameOver.width,
+      messageGameOver.height, //Tamanho da Sprite
+      messageGameOver.PositionX,
+      messageGameOver.PositionY,
+      messageGameOver.width,
+      messageGameOver.height
+    )
   }
+}
+
+
+function createScore(){
+  const score = {
+    pointing: 0,
+    draw() {
+      context.font = '35px "VT323"';
+      context.textAlign = 'right'
+      context.fillStyle = 'white'
+      context.fillText(`${score.pointing}`, canvas.width - 10, 35)
+      score.pointing
+    },
+  }
+  return score;
 }
 
 // [Pipes]
@@ -246,7 +271,7 @@ function createPipes() {
         // Sky pipes
         const pipeSkyX = even.x
         const pipeSkyY = yRandomPipes
-        contexto.drawImage(
+        context.drawImage(
           sprites,
           pipes.sky.spriteX,
           pipes.sky.spriteY, // Sprite x, Sprite Y
@@ -260,7 +285,7 @@ function createPipes() {
         // Floor pipes
         const pipeFloorX = even.x
         const pipeFloorY = pipes.height + gapPipes + yRandomPipes
-        contexto.drawImage(
+        context.drawImage(
           sprites,
           pipes.floor.spriteX,
           pipes.floor.spriteY, // Sprite x, Sprite Y
@@ -288,7 +313,7 @@ function createPipes() {
       const headOfFlappyBird = global.flappyBird.PositionY
       const footOfFlappyBird =
         global.flappyBird.PositionY + global.flappyBird.height
-      if (global.flappyBird.PositionX >= even.x) {
+      if ((global.flappyBird.PositionX + global.flappyBird.height) >= even.x) {
         if (headOfFlappyBird <= even.pipeSky.y) {
           return true
         }
@@ -312,16 +337,30 @@ function createPipes() {
       pipes.pairs.forEach(function (even) {
         even.x = even.x - 2
         if (pipes.collisionWithTheFlappyBird(even)) {
-          switchToScreen(screens.start)
+          hit_sound.play()
+          switchToScreen(screens.gameOver)
         }
 
         if (even.x + pipes.width <= 0) {
           pipes.pairs.shift()
+          score_sound.play()
+          global.score.pointing = global.score.pointing + 1;
         }
       })
     }
   }
   return pipes
+}
+
+// [Screens]
+const global = {}
+let screensActive = {}
+function switchToScreen(newScreen) {
+  screensActive = newScreen
+
+  if (screensActive.initialize) {
+    screensActive.initialize()
+  }
 }
 
 const screens = {
@@ -336,11 +375,11 @@ const screens = {
       backGround.draw()
       global.flappyBird.draw()
       global.floor.draw()
-      mensageGetReady.draw()
+      messageGetReady.draw()
     },
 
     click() {
-      switchToScreen(screens.jogo)
+      switchToScreen(screens.game)
     },
 
     update() {
@@ -349,12 +388,17 @@ const screens = {
   }
 }
 
-screens.jogo = {
+screens.game = {
+  initialize(){
+    global.score = createScore();
+  },
+
   draw() {
     backGround.draw()
     global.pipes.draw()
     global.floor.draw()
     global.flappyBird.draw()
+    global.score.draw()
   },
 
   click() {
@@ -365,7 +409,21 @@ screens.jogo = {
     global.pipes.update()
     global.floor.update()
     global.flappyBird.update()
+
   }
+}
+
+screens.gameOver = {
+  draw() {
+    messageGameOver.draw();
+ 
+  },
+  update() {
+
+  },
+  click() {
+    switchToScreen(screens.start)
+  },
 }
 
 function loop() {
@@ -382,5 +440,5 @@ window.addEventListener('click', function () {
   }
 })
 
-switchToScreen(screens.start)
+switchToScreen(screens.gameOver)
 loop()
